@@ -21,9 +21,10 @@ services:
       - ACCEPT_EULA=Y
     depends_on:
       - web
-    networks: 
+    networks:
       - pokenetwork
+    
 
 networks:
   pokenetwork:
-      name: pokenetwork
+    name: pokenetwork
