@@ -12,7 +12,7 @@ public static class Extensions
             detail: "Too many requests to translation api. Please try again later.");
     }
 
-    public static IResult GetResult(HttpResult<PokemonResponse> httpResult, string name) =>
+    public static IResult GetResult(this HttpResult<PokemonResponse> httpResult, string name) =>
         httpResult switch
         {
             {Success: true} r => Results.Json(r.Content),

@@ -39,7 +39,7 @@ try
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
         .CreateBootstrapLogger();
-    builder.Host.UseSerilog((context, logConfig) => { logConfig.ReadFrom.Configuration(builder.Configuration); });
+    builder.Host.UseSerilog((context, logConfig) => logConfig.ReadFrom.Configuration(builder.Configuration));
 
     builder.Services.AddHealthChecks();
 
@@ -65,8 +65,7 @@ try
         opts.IncludeQueryInRequestPath = true;
         opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
     });
-
-
+    
     app.MapControllers();
 
 
@@ -82,25 +81,13 @@ try
                 });
             }
 
-            return await pokemonService.GetAsync(name)! switch
-            {
-                { } pokemon => Results.Ok(pokemon),
-                _ => Results.NotFound(new ProblemDetails
-                {
-                    Detail = $"Pokemon '{name}' not found", Status = 404, Title = "Not Found",
-                })
-            };
+            return (await pokemonService.GetAsync(name)).GetResult(name);
         });
 
     app.MapGet("/pokemon/translated/{name}",
         async (string name, IPokemonService pokemonService) =>
-        {
-            HttpResult<PokemonResponse> a = (await pokemonService.TranslateAsync(name));
-            return GetResult(a, name);
-        });
+            (await pokemonService.TranslateAsync(name)).GetResult(name));
     app.Run();
-
-   
 }
 catch (Exception ex)
 {

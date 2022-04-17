@@ -8,5 +8,5 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine as runtime
 WORKDIR /app
 COPY --from=build /app/published-app /app
 
-EXPOSE 3000
+EXPOSE 5005
 ENTRYPOINT ["dotnet", "PokeTranslator.dll"]

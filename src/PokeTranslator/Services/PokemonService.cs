@@ -1,4 +1,5 @@
 using System.Text.Json;
+using O9d.Json.Formatting;
 using PokeTranslator.Config;
 using PokeTranslator.Model;
 using Serilog;
@@ -40,8 +41,14 @@ public class PokemonService : IPokemonService
             return new HttpResult<PokemonResponse>(false, null, response.StatusCode);
         }
 
+
         var pokemon =
-            (await JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync()))!;
+            (await JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync(),
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy()
+                }))!;
+
 
         return new HttpResult<PokemonResponse>(
             true,
