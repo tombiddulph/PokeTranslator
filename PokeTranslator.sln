@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7A4B76D9-6B7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B8BB1F26-6F04-48BA-A845-F28E1A01E5F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeTranslator.Tests.Unit", "test\PokeTranslator.Tests.Unit\PokeTranslator.Tests.Unit.csproj", "{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +23,13 @@ Global
 		{1B6F1E83-5874-4B96-8E69-3463987D51DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B6F1E83-5874-4B96-8E69-3463987D51DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B6F1E83-5874-4B96-8E69-3463987D51DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1B6F1E83-5874-4B96-8E69-3463987D51DA} = {7A4B76D9-6B74-4708-AE95-717A8FBCE800}
+		{5B2173DA-9C62-4B6A-AE43-BFE93F7EB4E3} = {B8BB1F26-6F04-48BA-A845-F28E1A01E5F1}
 	EndGlobalSection
 EndGlobal

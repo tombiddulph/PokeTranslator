@@ -53,8 +53,8 @@ public class PokemonService : IPokemonService
         return new HttpResult<PokemonResponse>(
             true,
             new PokemonResponse(
-                pokemon.FlavorTextEntries.FirstOrDefault(x => x.Language.Name == "en")?.FlavorText!,
                 pokemon.Name,
+                pokemon.FlavorTextEntries.FirstOrDefault(x => x.Language.Name == "en")?.FlavorText!,
                 pokemon.Habitat.Name,
                 pokemon.IsLegendary), response.StatusCode);
     }
@@ -90,6 +90,11 @@ public class PokemonService : IPokemonService
         }
 
         var translation = await response.Content.ReadFromJsonAsync<TranslationResponse>();
+
+        if (translation?.Success.Total == 0)
+        {
+            return getResponse;
+        }
 
         var translatedItems = translation!.Contents.Translated.Split(":");
 

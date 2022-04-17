@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using PokeTranslator.Config;
 using PokeTranslator.Helpers;
 using PokeTranslator.Middleware;
-using PokeTranslator.Model;
 using PokeTranslator.Services;
 using Prometheus;
 using Serilog;
-using static PokeTranslator.Helpers.Extensions;
 
 try
 {
