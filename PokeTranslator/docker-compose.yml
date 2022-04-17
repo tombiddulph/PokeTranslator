@@ -1,7 +1,29 @@
-version: "3.9"
+version: "3.5"
 services:
   web:
     build: .
     ports:
-      - "7042:8000"
-    
+      - "5005"
+    environment:
+      - ASPNETCORE_URLS=http://*:5005
+    networks:
+      - pokenetwork
+  
+  
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    hostname: seq
+    ports:
+      - '5341:5341'
+      - '80:80'
+    environment:
+      - ACCEPT_EULA=Y
+    depends_on:
+      - web
+    networks: 
+      - pokenetwork
+
+networks:
+  pokenetwork:
+      name: pokenetwork
