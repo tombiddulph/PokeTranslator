@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using ILogger = Serilog.ILogger;
+
 
 namespace PokeTranslator.Controllers;
 
@@ -6,27 +8,21 @@ namespace PokeTranslator.Controllers;
 [Route("[controller]")]
 public class PokemonController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+    private readonly ILogger _logger;
+    private readonly IPokemonService _pokemonService;
 
-    private readonly ILogger<PokemonController> _logger;
-
-    public PokemonController(ILogger<PokemonController> logger)
+    public PokemonController(ILogger logger, IPokemonService pokemonService)
     {
-        _logger = logger;
+        _logger = logger.ForContext<PokemonController>() ?? throw new ArgumentNullException(nameof(logger));
+        _pokemonService = pokemonService ?? throw new ArgumentNullException(nameof(pokemonService));
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<object> Get(string name)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+        _logger.Information("Getting pokemon {name}", name);
+        var pokemon = await _pokemonService.GetAsync(name);
+        return pokemon;
     }
+    
 }
