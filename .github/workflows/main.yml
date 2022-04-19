@@ -1,0 +1,44 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-2019, ubuntu-18.04, macos-10.15 ]
+
+    steps:
+      - name: Checkout the repository 
+        uses: actions/checkout@v2.3.4
+      
+      - name: Fetch all tags and branches
+        run: git fetch --prune --unshallow
+
+      - name: Cache Tools
+        uses: actions/cache@v2.1.6
+        with:
+          path: tools
+          key: ${{ runner.os }}-tools-${{ hashFiles('recipe.cake') }}
+      
+      - name: Build project
+        uses: cake-build/cake-action@v1
+        with:
+          script-path: build.cake
+          target: Build
+          verbosity: Normal
+          cake-version: 1.1.0
+          cake-bootstrap: true
