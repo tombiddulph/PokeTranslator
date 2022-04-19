@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./src/PokeTranslator/Dockerfile
+      dockerfile: ./Dockerfile
       
     ports:
       - "5005:5005"
@@ -11,22 +11,6 @@ services:
       - ASPNETCORE_URLS=http://*:5005
     networks:
       - pokenetwork
-  
-  
-  seq:
-    image: datalust/seq:latest
-    container_name: seq
-    hostname: seq
-    ports:
-      - '5341:5341'
-      - '80:80'
-    environment:
-      - ACCEPT_EULA=Y
-    depends_on:
-      - web
-    networks:
-      - pokenetwork
-    
 
 networks:
   pokenetwork:

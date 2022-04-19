@@ -1,0 +1,20 @@
+version: "3.5"
+services:
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    hostname: seq
+    ports:
+      - '5341:5341'
+      - '3001:80'
+    environment:
+      - ACCEPT_EULA=Y
+    depends_on:
+      - web
+    networks:
+      - pokenetwork
+    
+
+networks:
+  pokenetwork:
+    name: pokenetwork

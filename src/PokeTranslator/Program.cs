@@ -41,6 +41,9 @@ try
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
         .CreateBootstrapLogger();
+    
+    
+    Log.Logger.Information("Starting up");
     builder.Host.UseSerilog((context, logConfig) => logConfig.ReadFrom.Configuration(builder.Configuration));
 
     builder.Services.AddHealthChecks();
@@ -90,6 +93,8 @@ try
         async (string name, IPokemonService pokemonService) =>
             (await pokemonService.TranslateAsync(name)).GetResult(name));
     app.Run();
+    
+    Log.Logger.Information("Shutting down");
 }
 catch (Exception ex)
 {

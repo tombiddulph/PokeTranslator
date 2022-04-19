@@ -403,3 +403,4 @@ FodyWeavers.xsd
 *.dll
 
 tools/**
+*.recieved.txt
