@@ -16,10 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ windows-2022, ubuntu-20.04, macos-11 ]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the repository 
@@ -47,3 +44,15 @@ jobs:
           verbosity: Normal
           cake-version: 2.2.0
           cake-bootstrap: true
+          
+      - name: Run Integration Tests
+        uses: cake-build/cake-action@v1
+        with:
+          script-path: build.cake
+          target: IntegrationTests
+          verbosity: Normal
+          cake-version: 2.2.0
+          cake-bootstrap: true
+      
+      
+      
