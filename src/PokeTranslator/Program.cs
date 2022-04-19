@@ -17,9 +17,13 @@ try
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+    builder.Configuration.AddEnvironmentVariables();
 
     var pokemonOptions = new PokemonServiceOptions();
     builder.Configuration.GetSection(PokemonServiceOptions.Name).Bind(pokemonOptions);
+    builder.Services.AddSingleton(pokemonOptions);
 
 
     builder.Services.AddHttpClient(nameof(PokemonServiceOptions.PokemonApi))
@@ -96,3 +100,6 @@ finally
     Log.Information("Shutdown complete");
     Log.CloseAndFlush();
 }
+
+// Make the implicit Program class public so test projects can access it
+public partial class Program { }

@@ -13,8 +13,16 @@ public static class LogEnricher
     /// <param name="httpContext">The current HTTP Context</param>
     public static void EnrichFromRequest(IDiagnosticContext diagnosticContext, HttpContext httpContext)
     {
-        diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress.ToString());
-        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
-        diagnosticContext.Set("CorrelationId", httpContext.Response.Headers["X-Correlation-ID"].FirstOrDefault());
+        diagnosticContext.SetIfNotNull("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString());
+        diagnosticContext.SetIfNotNull("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+        diagnosticContext.SetIfNotNull("CorrelationId", httpContext.Response.Headers["X-Correlation-ID"].FirstOrDefault());
+    }
+    
+    public static void SetIfNotNull(this IDiagnosticContext context, string key, object? value)
+    {
+        if (value != null)
+        {
+            context.Set(key, value);
+        }
     }
 }

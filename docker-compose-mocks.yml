@@ -1,16 +1,16 @@
 version: "3.5"
 services:
   mock-server:
-    image: clue/json-server:latest
+    container_name: mock-server
+    build: 
+      context: .
+      dockerfile: test/MockServer/Dockerfile
     ports:
       - "3000:80" 
     hostname: "mock-server"
     networks:
       - pokenetwork
-    volumes:
-      - ./docker/json-server/data.json/:/data/db.json
-
-
+   
 networks:
   pokenetwork:
     name: pokenetwork

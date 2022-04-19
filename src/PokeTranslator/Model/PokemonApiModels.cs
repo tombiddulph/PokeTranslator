@@ -15,7 +15,6 @@ public record PokemonSpecies(
     Habitat Habitat,
     bool HasGenderDifferences,
     int HatchCounter,
-    int Id,
     bool IsBaby,
     bool IsLegendary,
     bool IsMythical,

@@ -19,6 +19,7 @@ public class PokemonService : IPokemonService
     private readonly ILogger _logger;
     private readonly HttpClient _pokemonApiClient;
 
+
     public PokemonService(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
@@ -38,15 +39,17 @@ public class PokemonService : IPokemonService
 
         if (!response.IsSuccessStatusCode)
         {
+            _logger.Warning("Failed to get pokemon {name}", name);
             return new HttpResult<PokemonResponse>(false, null, response.StatusCode);
         }
-
+        
 
         var pokemon =
-            (await JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync(),
+           await (JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync(),
                 new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy()
+                    PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy(),
+                   
                 }))!;
 
 
@@ -75,11 +78,11 @@ public class PokemonService : IPokemonService
 
         var pokemon = getResponse.Content!;
 
-        var translator = pokemon.Habitat?.ToLower() == "cave" || pokemon.IsLegendary
+        var translator = pokemon.Habitat.ToLower() == "cave" || pokemon.IsLegendary
             ? nameof(TranslationOptions.Yoda)
             : nameof(TranslationOptions.Shakespeare);
 
-        var text = $"{pokemon.Name}::{pokemon.Habitat}::{pokemon.Description}";
+        var text = pokemon.Description;
 
         var client = _httpClientFactory.CreateClient(translator);
         var response = await client.PostAsJsonAsync(string.Empty, new {text});
@@ -96,12 +99,12 @@ public class PokemonService : IPokemonService
             return getResponse;
         }
 
-        var translatedItems = translation!.Contents.Translated.Split(":");
+        var translatedDescription = translation!.Contents.Translated;
 
         var translatedPokemon = new PokemonResponse(
-            translatedItems[0],
-            translatedItems[1],
-            translatedItems[2],
+            pokemon.Name,
+            translatedDescription,
+            pokemon.Habitat,
             pokemon.IsLegendary);
 
         return new HttpResult<PokemonResponse>(true, translatedPokemon, response.StatusCode);

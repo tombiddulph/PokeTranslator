@@ -63,7 +63,7 @@ public class PokemonServiceTests
     {
         //arrange
         var mewtwo =
-            await File.ReadAllTextAsync(Path.Combine(Directory.GetCurrentDirectory(), "testdata", "mewtwo.json"));
+            await File.ReadAllTextAsync(Path.Combine(Directory.GetCurrentDirectory(), "Testdata", "mewtwo.json"));
         _httpClientFactory.CreateClient(Arg.Is(nameof(PokemonServiceOptions.PokemonApi)))
             .Returns(new HttpClient(new MockHttpStatusCodeHandler(HttpStatusCode.OK, new StringContent(mewtwo)))
                 {BaseAddress = new Uri("http://localhost")});
