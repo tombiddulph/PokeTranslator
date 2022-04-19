@@ -89,7 +89,7 @@ public class PokemonService : IPokemonService
 
         if (!response.IsSuccessStatusCode)
         {
-            return new HttpResult<PokemonResponse>(false, default, response.StatusCode);
+            return getResponse;
         }
 
         var translation = await response.Content.ReadFromJsonAsync<TranslationResponse>();

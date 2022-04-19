@@ -1,12 +1,6 @@
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
@@ -14,14 +8,14 @@ using Xunit;
 namespace PokeTranslator.Tests.Integration;
 
 [UsesVerify]
-public class PokeTranslatorTests : IClassFixture<PokeApplication>
+public class PokeTranslatorTests : IClassFixture<PokeTranslator>
 {
-    protected readonly PokeApplication _application;
+    protected readonly PokeTranslator Translator;
     private static readonly VerifySettings _verifierSettings = new();
 
-    public PokeTranslatorTests(PokeApplication application)
+    public PokeTranslatorTests(PokeTranslator translator)
     {
-        _application = application;
+        Translator = translator;
         _verifierSettings.UseDirectory("Snapshots");
         _verifierSettings.ScrubInlineGuids();
     }
@@ -30,7 +24,7 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
     public async Task GetAsync_Returns_Pokemon_When_Pokemon_Found()
     {
         //arrange
-        var client = _application.CreateClient();
+        var client = Translator.CreateClient();
 
         //act
         var response = await client.GetAsync("pokemon/mewtwo");
@@ -44,7 +38,7 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
     public async Task GetAsync_Returns_404_When_Pokemon_Not_Found()
     {
         //arrange
-        var client = _application.CreateClient();
+        var client = Translator.CreateClient();
 
         //act
         var response = await client.GetAsync("pokemon/tomb");
@@ -58,7 +52,7 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
     public async Task TranslateAsync_Returns_Yoda_Translated_Description_When_Pokemon_Found()
     {
         //arrange
-        var client = _application.CreateClient();
+        var client = Translator.CreateClient();
 
         //act
         var response = await client.GetAsync("pokemon/translated/mewtwo");
@@ -67,76 +61,18 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
         //assert
         await Verifier.Verify(new {message = response, content}, _verifierSettings);
     }
-}
 
-
-public class PokeApplication : WebApplicationFactory<Program>
-{
-    protected override TestServer CreateServer(IWebHostBuilder builder)
+    [Fact]
+    public async Task TranslateAsync_Returns_Normal_Description_When_Translation_Fails()
     {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.test.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
+        //arrange
+        var client = Translator.CreateClient();
 
-        builder
-            .UseConfiguration(configuration)
-            .UseContentRoot(Directory.GetCurrentDirectory())
-            .ConfigureAppConfiguration((hostContext, config) =>
-                config.AddJsonFile("appsettings.test.json", optional: false).AddEnvironmentVariables())
-            .ConfigureServices(
-                (context, services) => { });
+        //act
+        var response = await client.GetAsync("pokemon/translated/bulbasaur");
+        var content = await response.Content.ReadAsStringAsync();
 
-
-        return base.CreateServer(builder);
-    }
-
-    // protected override void ConfigureWebHost(IWebHostBuilder builder)
-    // {
-    //     IConfiguration configuration = new ConfigurationBuilder()
-    //         .SetBasePath(Directory.GetCurrentDirectory())
-    //         .AddJsonFile("appsettings.test.json", optional: false, reloadOnChange: true)
-    //         .AddEnvironmentVariables()
-    //         .Build();
-    //     
-    //     builder.ConfigureServices(services =>
-    //     {
-    //         var pokemonOptions = new PokemonServiceOptions();
-    //         configuration.GetSection(PokemonServiceOptions.Name).Bind(pokemonOptions);
-    //         services.AddHttpClient(nameof(PokemonServiceOptions.PokemonApi))
-    //             .ConfigureHttpClient(x => x.BaseAddress = new Uri(pokemonOptions.PokemonApi))
-    //             .ConfigurePrimaryHttpMessageHandler(() => new RecordingHandler());
-    //         services.AddHttpClient(nameof(TranslationOptions.Yoda))
-    //             .ConfigureHttpClient(x => x.BaseAddress = new Uri(pokemonOptions.Translations.Yoda))
-    //             .ConfigurePrimaryHttpMessageHandler(() => new RecordingHandler());
-    //         services.AddHttpClient(nameof(TranslationOptions.Shakespeare))
-    //             .ConfigureHttpClient(x => x.BaseAddress = new Uri(pokemonOptions.Translations.Shakespeare))
-    //             .ConfigurePrimaryHttpMessageHandler(() => new RecordingHandler());
-    //
-    //     });
-    //     base.ConfigureWebHost(builder);
-    // }
-
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-    
-    
-        var test = builder is IWebHostBuilder;
-        
-        builder
-            
-            .UseContentRoot(Directory.GetCurrentDirectory())
-            .UseEnvironment("test")
-            .ConfigureAppConfiguration((hostContext, config) =>
-            {
-                config.Sources.Clear();
-                config.AddJsonFile("appsettings.test.json", optional: false);
-                config.AddEnvironmentVariables();
-            });
-    
-        
-        return base.CreateHost(builder);
+        //assert
+        await Verifier.Verify(new {message = response, content}, _verifierSettings);
     }
 }
-
