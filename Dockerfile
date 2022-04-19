@@ -15,9 +15,9 @@ RUN dotnet test --logger:trx
 FROM build as integrationTest
 WORKDIR /app/test/PokeTranslator.Tests.Integration
 #override localhost endpoint
-ENV PokemonService__PokemonApi=http://host.docker.internal:3000/pokemon/
-ENV PokemonService__Translations__Shakespeare=http://host.docker.internal:3000/translate/shakespeare.json
-ENV PokemonService__Translations__Yoda=http://host.docker.internal:3000/translate/yoda.json
+ENV PokemonService__PokemonApi=http://172.17.0.1:3000/pokemon/
+ENV PokemonService__Translations__Shakespeare=http://172.17.0.1:3000/translate/shakespeare.json
+ENV PokemonService__Translations__Yoda=http://172.17.0.1:3000/translate/yoda.json
 CMD ["dotnet", "test", "--logger:trx"]
 
 
