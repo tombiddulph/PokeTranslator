@@ -27,7 +27,7 @@
       Method: {
         Method: GET
       },
-      RequestUri: 'http://localhost/pokemon/translated/bulbasaur',
+      RequestUri: 'http://localhost/pokemon/mewtwo',
       Headers: []
     }
   },
