@@ -5,11 +5,14 @@ services:
     build: 
       context: .
       dockerfile: test/MockServer/Dockerfile
+    extra_hosts:
+       - "host.docker.internal:host-gateway"
     ports:
       - "3000:80" 
     hostname: "mock-server"
     networks:
       - pokenetwork
+  
    
 networks:
   pokenetwork:

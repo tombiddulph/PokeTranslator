@@ -94,15 +94,15 @@ Task("DockerComposeTest")
 
 Teardown(ctx =>
 {
-    // if (dockerRunning)
-    // {
-    //     Information("Stopping docker containers");
-    //     DockerComposeDown(new DockerComposeDownSettings
-    //     {
-    //         Files = new[] {"./docker-compose-mocks.yml"},
-    //         RemoveOrphans  = true
-    //     });
-    // }
+    if (dockerRunning)
+    {
+        Information("Stopping docker containers");
+        DockerComposeDown(new DockerComposeDownSettings
+        {
+            Files = new[] {"./docker-compose-mocks.yml"},
+            RemoveOrphans  = true
+        });
+    }
 });
 
 Task("IntegrationTests")
