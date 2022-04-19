@@ -1,14 +1,14 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine as build
-WORKDIR /app
+WORKDIR /testserver
 COPY . .
 RUN dotnet restore
-RUN dotnet publish -o /app/published-app
+RUN dotnet publish -o /testserver/published-testserver
 
 EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine as runtime
-WORKDIR /app
-COPY --from=build /app/published-app /app
+WORKDIR /testserver
+COPY --from=build /testserver/published-testserver /testserver
 
 ENTRYPOINT ["dotnet", "MockServer.dll"]

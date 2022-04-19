@@ -9,6 +9,9 @@
 
     <ItemGroup>
       <PackageReference Include="O9d.Json.Formatting" Version="0.1.0" />
+        <PackageReference Include="Serilog" Version="2.10.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -20,5 +23,5 @@
     <ItemGroup>
       <None Include="TestData\mew-translated.json" />
     </ItemGroup>
-
+    
 </Project>

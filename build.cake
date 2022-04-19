@@ -56,7 +56,6 @@ Task("DockerBuildIntegrationTest")
     {
         var dockerSettings = new DockerImageBuildSettings
         {
-            // File = "./DockerFile",
             Tag = new [] { integrationTestName },
             Target = "integrationTest"
         };
@@ -95,18 +94,18 @@ Task("DockerComposeTest")
 
 Teardown(ctx =>
 {
-    if (dockerRunning)
-    {
-        Information("Stopping docker containers");
-        DockerComposeDown(new DockerComposeDownSettings
-        {
-            Files = new[] {"./docker-compose-mocks.yml"},
-            RemoveOrphans  = true
-        });
-    }
+    // if (dockerRunning)
+    // {
+    //     Information("Stopping docker containers");
+    //     DockerComposeDown(new DockerComposeDownSettings
+    //     {
+    //         Files = new[] {"./docker-compose-mocks.yml"},
+    //         RemoveOrphans  = true
+    //     });
+    // }
 });
 
-Task("RunIntegration")
+Task("IntegrationTests")
     .IsDependentOn("DockerBuildIntegrationTest")
     .IsDependentOn("DockerComposeTest")
     .IsDependentOn("DockerRunIntegrationTest");

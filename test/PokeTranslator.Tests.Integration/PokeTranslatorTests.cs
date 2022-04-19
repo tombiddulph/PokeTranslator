@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
@@ -30,15 +31,13 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
     {
         //arrange
         var client = _application.CreateClient();
-        
+
         //act
         var response = await client.GetAsync("pokemon/mewtwo");
         var content = await response.Content.ReadAsStringAsync();
-        
+
         //assert
         await Verifier.Verify(new {message = response, content}, _verifierSettings);
-      
-        
     }
 
     [Fact]
@@ -46,15 +45,30 @@ public class PokeTranslatorTests : IClassFixture<PokeApplication>
     {
         //arrange
         var client = _application.CreateClient();
-        
+
         //act
         var response = await client.GetAsync("pokemon/tomb");
         var content = await response.Content.ReadAsStringAsync();
-        
+
+        //assert
+        await Verifier.Verify(new {message = response, content}, _verifierSettings);
+    }
+    
+    [Fact]
+    public async Task TranslateAsync_Returns_Yoda_Translated_Description_When_Pokemon_Found()
+    {
+        //arrange
+        var client = _application.CreateClient();
+
+        //act
+        var response = await client.GetAsync("pokemon/translated/mewtwo");
+        var content = await response.Content.ReadAsStringAsync();
+
         //assert
         await Verifier.Verify(new {message = response, content}, _verifierSettings);
     }
 }
+
 
 public class PokeApplication : WebApplicationFactory<Program>
 {
@@ -104,38 +118,25 @@ public class PokeApplication : WebApplicationFactory<Program>
     //     base.ConfigureWebHost(builder);
     // }
 
-    // protected override IHost CreateHost(IHostBuilder builder)
-    // {
-    //
-    //
-    //     var test = builder is IWebHostBuilder;
-    //     
-    //     builder
-    //         
-    //         .UseContentRoot(Directory.GetCurrentDirectory())
-    //         .UseEnvironment("test")
-    //         .ConfigureAppConfiguration((hostContext, config) =>
-    //         {
-    //             config.Sources.Clear();
-    //             config.AddJsonFile("appsettings.test.json", optional: false);
-    //             config.AddEnvironmentVariables("Poke_");
-    //         });
-    //
-    //     
-    //     return base.CreateHost(builder);
-    // }
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+    
+    
+        var test = builder is IWebHostBuilder;
+        
+        builder
+            
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseEnvironment("test")
+            .ConfigureAppConfiguration((hostContext, config) =>
+            {
+                config.Sources.Clear();
+                config.AddJsonFile("appsettings.test.json", optional: false);
+                config.AddEnvironmentVariables();
+            });
+    
+        
+        return base.CreateHost(builder);
+    }
 }
 
-// public static class Extensions
-// {
-//     public static IHostBuilder UseConfiguration(this IHostBuilder hostBuilder, IConfiguration configuration)
-//     {
-//         foreach (var setting in configuration.AsEnumerable(makePathsRelative: true))
-//         {
-//             hostBuilder.UseSetting(setting.Key, setting.Value);
-//         }
-//
-//         return hostBuilder;
-//     }
-//
-// }
