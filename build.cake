@@ -3,6 +3,7 @@ var configuration = Argument("configuration", "Release");
 var dockerRunning = false;
 
 const string integrationTestName = "poke-integration-test:latest";
+const string unitTestName = "poke-unit-test:latest";
 
 //////////////////////////////////////////////////////////////////////
 // addins
@@ -30,16 +31,18 @@ Task("Build")
     });
 });
 
-Task("Test")
+Task("UnitTest")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    DotNetTest("./PokeTranslator.sln", new DotNetTestSettings
+    DotNetTest("./test/PokeTranslator.Tests.Unit/PokeTranslator.Tests.Unit.csproj", new DotNetTestSettings
     {
         Configuration = configuration,
         NoBuild = true,
     });
 });
+
+
 
 Task("DockerBuild")
     .Does(() => 
@@ -50,6 +53,33 @@ Task("DockerBuild")
         };
         DockerBuild(dockerSettings, ".");
     });
+
+
+
+Task("DockerBuildUnitTest")
+    .Does(() =>
+    {
+        var dockerSettings = new DockerImageBuildSettings
+        {
+            Tag = new [] { unitTestName },
+            Target = "unitTest"
+        };
+        DockerBuild(dockerSettings, ".");
+    });
+
+Task("DockerRunUnitTest")
+    .Does(() => 
+    {
+        var settings = new DockerContainerRunSettings
+        {
+            Network = "pokenetwork",
+            Rm = true
+        };
+
+        DockerRunWithoutResult(settings, unitTestName, null);
+    });
+
+
 
 Task("DockerBuildIntegrationTest")
     .Does(() =>
@@ -74,7 +104,7 @@ Task("DockerRunIntegrationTest")
         DockerRunWithoutResult(settings, integrationTestName, null);
     });
 
-Task("DockerComposeTest")
+Task("DockerComposeMocks")
     .Does(() => 
     {
         dockerRunning = true;
@@ -107,7 +137,11 @@ Teardown(ctx =>
 
 Task("IntegrationTests")
     .IsDependentOn("DockerBuildIntegrationTest")
-    .IsDependentOn("DockerComposeTest")
+    .IsDependentOn("DockerComposeMocks")
     .IsDependentOn("DockerRunIntegrationTest");
+
+Task("UnitTests")
+    .IsDependentOn("DockerBuildUnitTest")
+    .IsDependentOn("DockerRunUnitTest");
 
 RunTarget(target);

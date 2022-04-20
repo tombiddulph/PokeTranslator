@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using PokeTranslator.Config;
 using PokeTranslator.Services;
@@ -16,10 +17,13 @@ public class PokemonServiceTests
 {
     private IPokemonService? _pokemonService;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IMemoryCache _memoryCache;
 
     public PokemonServiceTests()
     {
         _httpClientFactory = Substitute.For<IHttpClientFactory>();
+        _memoryCache = Substitute.For<IMemoryCache>();
+        _memoryCache.TryGetValue(Arg.Any<object>(), out Arg.Any<object>()).ReturnsForAnyArgs(false);
     }
 
     [Fact]
@@ -30,7 +34,7 @@ public class PokemonServiceTests
             .Returns(new HttpClient(new MockHttpStatusCodeHandler(HttpStatusCode.NotFound))
                 {BaseAddress = new Uri("http://localhost")});
 
-        _pokemonService = new PokemonService(_httpClientFactory);
+        _pokemonService = new PokemonService(_httpClientFactory, _memoryCache);
 
         //act
         var result = await _pokemonService.GetAsync("tom");
@@ -49,7 +53,7 @@ public class PokemonServiceTests
             .Returns(new HttpClient(new MockHttpStatusCodeHandler(HttpStatusCode.NotFound))
                 {BaseAddress = new Uri("http://localhost")});
 
-        _pokemonService = new PokemonService(_httpClientFactory);
+        _pokemonService = new PokemonService(_httpClientFactory, _memoryCache);
 
         //act
         Func<Task> action = async () => await _pokemonService.GetAsync(null!);
@@ -68,7 +72,7 @@ public class PokemonServiceTests
             .Returns(new HttpClient(new MockHttpStatusCodeHandler(HttpStatusCode.OK, new StringContent(mewtwo)))
                 {BaseAddress = new Uri("http://localhost")});
 
-        _pokemonService = new PokemonService(_httpClientFactory);
+        _pokemonService = new PokemonService(_httpClientFactory,_memoryCache);
 
         //act
         var result = await _pokemonService.GetAsync("mewtwo");

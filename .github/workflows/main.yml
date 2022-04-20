@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build & Test
 
 # Controls when the workflow will run
 on:
@@ -41,6 +41,15 @@ jobs:
         with:
           script-path: build.cake
           target: Build
+          verbosity: Normal
+          cake-version: 2.2.0
+          cake-bootstrap: true
+      
+      - name: Run Unit Tests
+        uses: cake-build/cake-action@v1
+        with:
+          script-path: build.cake
+          target: UnitTests
           verbosity: Normal
           cake-version: 2.2.0
           cake-bootstrap: true

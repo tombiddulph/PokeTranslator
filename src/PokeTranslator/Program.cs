@@ -36,6 +36,7 @@ try
         .ConfigureHttpClient(x => x.BaseAddress = new Uri(pokemonOptions.Translations.Shakespeare))
         .AddPolicyHandler(PolicyHelper.GetRetryPolicy());
 
+    builder.Services.AddMemoryCache();
     builder.Services.AddTransient<IPokemonService, PokemonService>();
 
     Log.Logger = new LoggerConfiguration()
@@ -60,7 +61,6 @@ try
 
     app.MapHealthChecks("/health");
     app.UseAuthorization();
-    //app.UseEndpoints(endpoints => endpoints.MapMetrics());
     app.UseHttpMetrics();
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<ErrorMiddleware>();

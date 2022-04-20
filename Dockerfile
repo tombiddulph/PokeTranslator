@@ -4,15 +4,12 @@ COPY ./src ./src
 RUN dotnet restore /app/src/PokeTranslator/PokeTranslator.csproj
 RUN dotnet publish  /app/src/PokeTranslator/PokeTranslator.csproj -o /app/published-app
 
-FROM build as unitTestRunner
-COPY ./test ./test
-WORKDIR /app/test/PokeTranslator.Tests.Unit
-CMD ["dotnet", "test", "--logger:trx"]
-
 FROM build as unitTest
 COPY ./test ./test
 WORKDIR /app/test/PokeTranslator.Tests.Unit
-RUN dotnet test --logger:trx
+RUN dotnet restore PokeTranslator.Tests.Unit.csproj
+RUN dotnet publish PokeTranslator.Tests.Unit.csproj -o /app/unit-test-app
+ENTRYPOINT ["dotnet", "test", "--logger:trx"]
 
 FROM build as integrationTest
 COPY ./test ./test

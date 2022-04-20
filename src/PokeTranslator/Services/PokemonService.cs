@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using O9d.Json.Formatting;
 using PokeTranslator.Config;
 using PokeTranslator.Model;
@@ -18,12 +19,13 @@ public class PokemonService : IPokemonService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
     private readonly HttpClient _pokemonApiClient;
+    private readonly IMemoryCache _memoryMemoryCache;
 
-
-    public PokemonService(IHttpClientFactory httpClientFactory)
+    public PokemonService(IHttpClientFactory httpClientFactory, IMemoryCache memoryCache)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _logger = Log.Logger.ForContext<PokemonService>() ?? throw new ArgumentException(nameof(Log.Logger));
+        _memoryMemoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         _pokemonApiClient = httpClientFactory.CreateClient(nameof(PokemonServiceOptions.PokemonApi)) ??
                             throw new ArgumentException(PokemonServiceOptions.Name);
     }
@@ -35,6 +37,12 @@ public class PokemonService : IPokemonService
             throw new ArgumentNullException(nameof(name));
         }
 
+        if (_memoryMemoryCache.TryGetValue(name, out HttpResult<PokemonResponse> pokemonResponse))
+        {
+            _logger.Debug("Cache hit for {name}", name);
+            return pokemonResponse;
+        }
+
         var response = await _pokemonApiClient.GetAsync(name);
 
         if (!response.IsSuccessStatusCode)
@@ -42,24 +50,28 @@ public class PokemonService : IPokemonService
             _logger.Warning("Failed to get pokemon {name}", name);
             return new HttpResult<PokemonResponse>(false, null, response.StatusCode);
         }
-        
+
 
         var pokemon =
-           await (JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync(),
+            await JsonSerializer.DeserializeAsync<PokemonSpecies>(await response.Content.ReadAsStreamAsync(),
                 new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy(),
-                   
-                }))!;
+                });
 
 
-        return new HttpResult<PokemonResponse>(
+
+        var result =  new HttpResult<PokemonResponse>(
             true,
             new PokemonResponse(
-                pokemon.Name,
+                pokemon!.Name,
                 pokemon.FlavorTextEntries.FirstOrDefault(x => x.Language.Name == "en")?.FlavorText!,
                 pokemon.Habitat.Name,
                 pokemon.IsLegendary), response.StatusCode);
+        
+        _memoryMemoryCache.Set(pokemon!.Name, result, TimeSpan.FromHours(1));
+
+        return result;
     }
 
     public async Task<HttpResult<PokemonResponse>> TranslateAsync(string name)
@@ -74,6 +86,12 @@ public class PokemonService : IPokemonService
         if (!getResponse.Success)
         {
             return getResponse;
+        }
+
+        if (_memoryMemoryCache.TryGetValue($"{name}-translated", out HttpResult<PokemonResponse> pokemonResponse))
+        {
+            _logger.Debug("Cache hit for {name}", $"{name}-translated");
+            return pokemonResponse;
         }
 
         var pokemon = getResponse.Content!;
@@ -107,6 +125,12 @@ public class PokemonService : IPokemonService
             pokemon.Habitat,
             pokemon.IsLegendary);
 
-        return new HttpResult<PokemonResponse>(true, translatedPokemon, response.StatusCode);
+       
+
+        var result =  new HttpResult<PokemonResponse>(true, translatedPokemon, response.StatusCode);
+        
+        _memoryMemoryCache.Set($"{translatedPokemon.Name}-translated", response, TimeSpan.FromHours(1));
+
+        return result;
     }
 }
