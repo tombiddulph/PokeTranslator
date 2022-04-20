@@ -4,7 +4,6 @@ using PokeTranslator.Config;
 using PokeTranslator.Helpers;
 using PokeTranslator.Middleware;
 using PokeTranslator.Services;
-using Prometheus;
 using Serilog;
 
 try
@@ -18,7 +17,8 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-    builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+    builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true,
+        reloadOnChange: true);
     builder.Configuration.AddEnvironmentVariables();
 
     var pokemonOptions = new PokemonServiceOptions();
@@ -42,8 +42,8 @@ try
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
         .CreateBootstrapLogger();
-    
-    
+
+
     Log.Logger.Information("Starting up");
     builder.Host.UseSerilog((context, logConfig) => logConfig.ReadFrom.Configuration(builder.Configuration));
 
@@ -55,13 +55,12 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "PokeApi API V1"); });
         Log.Logger.Information(builder.Configuration.GetDebugView());
     }
 
     app.MapHealthChecks("/health");
     app.UseAuthorization();
-    app.UseHttpMetrics();
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<ErrorMiddleware>();
     app.UseHttpsRedirection();
@@ -70,13 +69,22 @@ try
         opts.IncludeQueryInRequestPath = true;
         opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
     });
-    
+
     app.MapControllers();
 
 
     app.MapGet("/pokemon/{name}",
         async ([Required] string name, [FromServices] IPokemonService pokemonService) =>
         {
+            if (int.TryParse(name, out var _))
+            {
+                return Results.BadRequest(new ProblemDetails
+                {
+                    Title = "Invalid name",
+                    Detail = "Pokemon name must be a string"
+                });
+            }
+
             if (name.ToLower() == "translated")
             {
                 return Results.BadRequest(new ProblemDetails
@@ -91,9 +99,20 @@ try
 
     app.MapGet("/pokemon/translated/{name}",
         async (string name, IPokemonService pokemonService) =>
-            (await pokemonService.TranslateAsync(name)).GetResult(name));
+        {
+            if (int.TryParse(name, out _))
+            {
+                return Results.BadRequest(new ProblemDetails
+                {
+                    Title = "Invalid name",
+                    Detail = "Pokemon name must be a string"
+                });
+            }
+
+            return (await pokemonService.TranslateAsync(name)).GetResult(name);
+        });
     app.Run();
-    
+
     Log.Logger.Information("Shutting down");
 }
 catch (Exception ex)
@@ -107,4 +126,6 @@ finally
 }
 
 // Make the implicit Program class public so test projects can access it
-public partial class Program { }
+public partial class Program
+{
+}
