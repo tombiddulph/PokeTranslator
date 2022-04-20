@@ -190,4 +190,5 @@ To Productionize the app a number of things would need to be changed:
 
 * Metrics - There are no metrics within the app at the moment. Metrics are important for observability and monitoring to help increase operational resilience & guard against outages.
 
+* Git workflow - For the purposes of this test all of the commits have been straight to main. Going forward some form of branch based strategy should be adopted.
 
