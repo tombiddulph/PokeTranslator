@@ -73,6 +73,8 @@ curl --location --request GET 'http://localhost:5005/pokemon/translated/<pokemon
 }
 ```
 
+Every response has the header `X-Correlation-ID` which the value of can be used to find the logs in seq.
+
 
 ____
 
@@ -161,4 +163,31 @@ PokeTranslator is dependant on 3 external apis
 1. https://pokeapi.co/api/v2/pokemon-species/ for information about pokemon
 2. https://api.funtranslations.com/translate/shakespeare.json for  shakespeare translations.
 4. https://api.funtranslations.com/translate/yoda.json for yoda translations.
+
+___
+### About
+
+PokeTranslator has been developed with .NET 6.0 & C# 10. It makes use of the newly introduced [Minimal Api](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-6.0) hosting model.
+
+A small number of 3rd party packages are used for various purposes
+
+| Package                                | Description                                   | Url                                                 |
+|----------------------------------------|-----------------------------------------------|-----------------------------------------------------|
+| `Serilog.*`                            | Logging provider                              | https://serilog.net/                                |
+| `09d.Json.Formatting`                  | Snake case provider for                       | https://www.nuget.org/packages/O9d.Json.Formatting  |
+| `Polly`                                | Transient fault handler for network requests  | https://github.com/App-vNext/Polly/                 | 
+| `Microsoft.Extensions.Caching.Memory`  | In memory cache                               | https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory
+</br>
+
+The project uses GitHub actions to build and test on each commit.
+
+To Productionize the app a number of things would need to be changed:
+* Caching - the current implementation is tied to the lifetime of the container that the app is running in as it is an in memory cache. This isn't suitable for a production scenario, it also can't be shared across containers. The lifetime of the cache is set to 1 hour and is currently not configurable.
+
+* Testing - The current test coverage isn't optimal and a number of flows are missing, especially from the integration test project. Load testing would be useful to see how the application performs under load so that infrastructure can be appropriately provisioned.
+
+* Authentication - There is no authentication at present. The translation apis offer a small number of requests per hour before being rate limited. To guard against this authentication could be put in place in the app.
+
+* Metrics - There are no metrics within the app at the moment. Metrics are important for observability and monitoring to help increase operational resilience & guard against outages.
+
 
