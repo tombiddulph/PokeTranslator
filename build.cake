@@ -72,7 +72,6 @@ Task("DockerRunUnitTest")
     {
         var settings = new DockerContainerRunSettings
         {
-            Network = "pokenetwork",
             Rm = true
         };
 
